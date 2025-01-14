@@ -40,9 +40,6 @@ class Window(QMainWindow):
         self.label.resize(640, 480)
         self.setWindowTitle("Аналіз спектрограми двигуна")
         self.resize(800, 500)
-        self.previous_width = self.width()
-        self.previous_height = self.height()
-        #self.resize_label()
 
     def load_file(self):
         # Діалог вибору файла
@@ -78,8 +75,6 @@ class Window(QMainWindow):
         delta_height = self.height() - (self.label.height() + 20)
         png_width = self.label.width() + min(delta_width, delta_height)  # Зміна ширини
         png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
-        self.previous_width = self.width()
-        self.previous_height = self.height()
         self.label.resize(png_width, png_height)  # width, height
 
 if __name__ == "__main__":
