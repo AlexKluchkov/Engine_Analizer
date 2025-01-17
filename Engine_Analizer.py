@@ -25,6 +25,12 @@ class Window(QMainWindow):
         self.menuFile.setTitle("Файл")
         self.menuAnalize = QMenu(self.menubar)
         self.menuAnalize.setTitle("Проаналізувати")
+
+        self.actionAnalize = QAction()
+        self.actionAnalize.setText("Порівняти")
+        self.actionAnalize.triggered.connect(self.compare_spectrogram)
+        self.menuAnalize.addAction(self.actionAnalize)
+
         self.setMenuBar(self.menubar)
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
@@ -38,10 +44,16 @@ class Window(QMainWindow):
         self.label = QLabel(self)
         self.label.move(0, 20)
         self.label.resize(640, 480)
+
+        self.label2 = QLabel(self)
+        self.label2.move(self.label.width() + 5, 20)
+        self.label2.resize(0, 0)
+
         self.setWindowTitle("Аналіз спектрограми двигуна")
         self.resize(800, 500)
 
-    def load_file(self):
+
+    def download_file(self, label):
         # Діалог вибору файла
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Усі файли (*);;Текстові файли (*.txt)", options=options)
@@ -51,9 +63,7 @@ class Window(QMainWindow):
             D = librosa.stft(y)
             S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
             # Візуализація спектрограми
-
             fig, ax = plt.subplots(1)
-
             librosa.display.specshow(S_db, sr=sr, x_axis='time', y_axis='log', cmap='magma')
             plt.colorbar(format='%+2.0f дБ')
             plt.title('Спектрограма')
@@ -62,20 +72,37 @@ class Window(QMainWindow):
             
             fig.savefig("spectrum.png")
             pixmap = QtGui.QPixmap("spectrum.png")
-            self.label.setPixmap(pixmap)
-            self.label.setScaledContents(True) #маштабування зображення до розміру label
-
+            label.setPixmap(pixmap)
+            label.setScaledContents(True) #маштабування зображення до розміру label
+    def load_file(self):
+        self.download_file(self.label)
+    
+    def compare_spectrogram(self):
+        self.download_file(self.label2)
+        self.label.resize(320, 240)
+        self.label2.move(self.label.width(), 20)
+        self.label2.resize(320, 240)
+        self.resize(700, 500)
 
     def resizeEvent(self, event):
         self.resize_label()
         super().resizeEvent(event)
 
     def resize_label(self):
-        delta_width = self.width() - self.label.width()
-        delta_height = self.height() - (self.label.height() + 20)
-        png_width = self.label.width() + min(delta_width, delta_height)  # Зміна ширини
-        png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
-        self.label.resize(png_width, png_height)  # width, height
+        if(self.label2.width() != 0):
+            delta_width = self.width() - (self.label.width() + self.label2.width() + 5)
+            delta_height = self.height() - (self.label.height() + 20)
+            png_width = self.label.width() + int(min(delta_width, delta_height)/2)  # Зміна ширини (2 малюнки)
+            png_height = self.label.height() + int(min(delta_width, delta_height)/2)  # Зміна висоти
+            self.label.resize(png_width, png_height)  # width, height
+            self.label2.move(self.label.width() + 5, 20)
+            self.label2.resize(png_width, png_height)  # width, height
+        else:
+            delta_width = self.width() - self.label.width()
+            delta_height = self.height() - (self.label.height() + 20)
+            png_width = self.label.width() + min(delta_width, delta_height)  # Зміна ширини
+            png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
+            self.label.resize(png_width, png_height)  # width, height
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
