@@ -48,6 +48,7 @@ class Window(QMainWindow):
         self.label.resize(640, 480)
 
         self.label2 = QLabel(self)
+        self.label2.move(self.label.width() + 5, 20)
         self.label2.move(self.label.width() + 5, self.top_indent)
         self.label2.resize(0, 0)
 
@@ -77,6 +78,7 @@ class Window(QMainWindow):
             label.setPixmap(pixmap)
             label.setScaledContents(True) #маштабування зображення до розміру label
 
+
     def load_file(self):
         self.download_file(self.label)
     
@@ -105,13 +107,12 @@ class Window(QMainWindow):
             png_width = self.label.width() + min(delta_width, delta_height)  # Зміна ширини
             png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
             self.label.resize(png_width, png_height)  # width, height
-
-    def normalize_spectrogram(spectrogram, min_val=0, max_val=1):
-        spectrogram_min = spectrogram.min()
-        spectrogram_max = spectrogram.max()
-        normalized_spectrogram = (spectrogram - spectrogram_min) / (spectrogram_max - spectrogram_min)
-        normalized_spectrogram = normalized_spectrogram * (max_val - min_val) + min_val
-        return normalized_spectrogram
+        def normalize_spectrogram(spectrogram, min_val=0, max_val=1):
+            spectrogram_min = spectrogram.min()
+            spectrogram_max = spectrogram.max()
+            normalized_spectrogram = (spectrogram - spectrogram_min) / (spectrogram_max - spectrogram_min)
+            normalized_spectrogram = normalized_spectrogram * (max_val - min_val) + min_val
+            return normalized_spectrogram
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
