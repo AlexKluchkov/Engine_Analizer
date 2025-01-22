@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLineEdit, QFileDialog, QMenuBar, QMenu, QStatusBar, QAction, QLabel
 
+from PyQt5.QtWidgets import QMessageBox
+
 import sys
 import librosa
 import librosa.display
@@ -11,9 +13,12 @@ from matplotlib.figure import Figure
 
 import numpy as np
 
+import Spectrogram_Analysis
+
 class Window(QMainWindow):
     top_indent = 20                     #Відступ зверху зображення спектограм
     indent_between_spectrogram = 10     #Відступ між двума зображеннями спектограм при порівнянні
+
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -77,16 +82,30 @@ class Window(QMainWindow):
             pixmap = QtGui.QPixmap("spectrum.png")
             label.setPixmap(pixmap)
             label.setScaledContents(True) #маштабування зображення до розміру label
+            return y, sr
+        else:
+            return None, None
 
 
     def load_file(self):
-        self.download_file(self.label)
+        self.y, self.sr = self.download_file(self.label)
     
     def compare_spectrogram(self):
-        self.download_file(self.label2)
-        self.label.resize(int(self.label.width() / 2), int(self.label.height() / 2))
-        self.label2.move(self.label.width(), self.top_indent)
-        self.label2.resize(self.label.width(), self.label.height())
+        if(self.label.pixmap() is not None):            # Якщо є перше зображення
+            y2, sr2= self.download_file(self.label2)             # завантажуємо друге
+            if(self.label2.pixmap() is not None):       # Якщо є друге зображення
+                self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
+                self.label2.move(self.label.width(), self.top_indent)
+                self.label2.resize(self.label.width(), self.label.height())
+                SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
+                SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
+
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Помилка")
+            msg.setText("Завантажте файл")
+            msg.setIcon(QMessageBox.Warning)
+            msg.exec_()
 
     def resizeEvent(self, event):
         self.resize_label()
@@ -98,7 +117,7 @@ class Window(QMainWindow):
             delta_height = self.height() - (self.label.height() + self.top_indent)
             png_width = self.label.width() + int(min(delta_width, delta_height)/2)  # Зміна ширини (2 малюнки)
             png_height = self.label.height() + int(min(delta_width, delta_height)/2)  # Зміна висоти
-            self.label.resize(png_width, png_height)  # width, height
+            self.label.resize(png_width, png_height)
             self.label2.move(self.label.width() + 5, self.top_indent)
             self.label2.resize(png_width, png_height)  # width, height
         else:
@@ -107,12 +126,6 @@ class Window(QMainWindow):
             png_width = self.label.width() + min(delta_width, delta_height)  # Зміна ширини
             png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
             self.label.resize(png_width, png_height)  # width, height
-        def normalize_spectrogram(spectrogram, min_val=0, max_val=1):
-            spectrogram_min = spectrogram.min()
-            spectrogram_max = spectrogram.max()
-            normalized_spectrogram = (spectrogram - spectrogram_min) / (spectrogram_max - spectrogram_min)
-            normalized_spectrogram = normalized_spectrogram * (max_val - min_val) + min_val
-            return normalized_spectrogram
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
