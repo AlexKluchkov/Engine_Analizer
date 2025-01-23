@@ -15,18 +15,11 @@ class Spectrogram_Analysis():
 
     def cosinus_compare_spectrgrum(self, y1, y2, sr1, sr2):
 
-        output_length = max(len(y1), len(y2))
+        if len(y1) > len(y2):
+            y1 = y1[:len(y2)]
+        elif len(y1) < len(y2):
+            y2 = y2[:len(y1)]
         
-        if len(y1) > output_length:
-            y1 = y1[:output_length]  # Îáðåçàòü
-        else:
-            y1 = np.pad(y1, (0, output_length - len(y1)), mode='constant')  # Äîïîëíèòü íóëÿìè
-
-        if len(y2) > output_length:
-            y2 = y2[:output_length]  # Îáðåçàòü
-        else:
-            y2 = np.pad(y2, (0, output_length - len(y2)), mode='constant')  # Äîïîëíèòü íóëÿìè
-
         S1 = librosa.stft(y1)
         S2 = librosa.stft(y2)
         
