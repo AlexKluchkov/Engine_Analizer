@@ -38,3 +38,4 @@ class Spectrogram_Analysis():
         C.GetAnswer(f"Cosine Similarity: {cos_sim}")
         C.show()
         return C
+
