@@ -53,7 +53,6 @@ class Window(QMainWindow):
         self.label.resize(640, 480)
 
         self.label2 = QLabel(self)
-        self.label2.move(self.label.width() + 5, 20)
         self.label2.move(self.label.width() + 5, self.top_indent)
         self.label2.resize(0, 0)
 
@@ -98,7 +97,7 @@ class Window(QMainWindow):
                 self.label2.move(self.label.width(), self.top_indent)
                 self.label2.resize(self.label.width(), self.label.height())
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
-                SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
+                self.ConsoleWindow = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
 
         else:
             msg = QMessageBox()
