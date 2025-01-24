@@ -33,5 +33,9 @@ class Spectrogram_Analysis():
         vec2 = S2_db.flatten()
 
         cos_sim = 1 - cosine(vec1, vec2)
-        print(f"Cosine Similarity: {cos_sim}")
+        
+        C = Console.Console()
+        C.GetAnswer(f"Cosine Similarity: {cos_sim}")
+        C.show()
+        return C
 
