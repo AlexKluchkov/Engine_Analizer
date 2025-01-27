@@ -8,7 +8,5 @@ class Console(QWidget):
         self.label.resize(self.width(), self.height())
 
     def GetAnswer(self, Answer):
-        self.label.setText(Answer)
-
-
-
+        text = self.label.text()
+        self.label.setText(text + "\n" + Answer)
