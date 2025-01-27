@@ -26,7 +26,7 @@ class Spectrogram_Analysis():
         # Претворення в спектрограми
         S1 = librosa.stft(y1)
         S2 = librosa.stft(y2)
-        # Амплітудный спектр
+        # Амплітудний спектр
         S1_db = librosa.amplitude_to_db(np.abs(S1), ref=np.max)
         S2_db = librosa.amplitude_to_db(np.abs(S2), ref=np.max)
 
