@@ -19,14 +19,14 @@ class Spectrogram_Analysis():
     def cosinus_compare_spectrgrum(self, y1, y2, sr1, sr2):
 
         if len(y1) > len(y2):
-            y1 = y1[:len(y2)]  # Обрезать
+            y1 = y1[:len(y2)]
         elif len(y1) < len(y2):
             y2 = y2[:len(y1)]
 
-        # Преобразование в спектрограммы
+        # Претворення в спектрограми
         S1 = librosa.stft(y1)
         S2 = librosa.stft(y2)
-        # Амплитудный спектр
+        # Амплітудный спектр
         S1_db = librosa.amplitude_to_db(np.abs(S1), ref=np.max)
         S2_db = librosa.amplitude_to_db(np.abs(S2), ref=np.max)
 
