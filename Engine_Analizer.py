@@ -132,7 +132,10 @@ class Window(QMainWindow):
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
                 cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
                 self.ConsoleWindow.GetAnswer(f"Cosine Similarity: {cos_sim}")
-
+                if(cos_sim > 0.9):
+                    self.ConsoleWindow.GetAnswer(f"No problems found")
+                else:
+                    self.ConsoleWindow.GetAnswer(f"Problem found")
         else:
             self.ConsoleWindow.GetAnswer("Помилка! Завантажте файл!")
             
