@@ -1,13 +1,11 @@
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLineEdit, QFileDialog, QMenuBar, QMenu, QStatusBar, QAction, QLabel
 
+import os
 import sys
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 
 import numpy as np
 
@@ -33,21 +31,26 @@ class Window(QMainWindow):
         self.menuAnalize.setTitle("Проаналізувати")
 
         self.actionAnalize = QAction()
-        self.actionAnalize.setText("Порівняти")
+        self.actionAnalize.setText("Порівняти спектрограми")
         self.actionAnalize.triggered.connect(self.compare_spectrogram)
         self.menuAnalize.addAction(self.actionAnalize)
-        self.actionSpectr = QAction()
-        self.actionSpectr.setText("Спектр")
-        self.actionSpectr.triggered.connect(self.spectr)
-        self.menuAnalize.addAction(self.actionSpectr)
+        self.actionСompareSpectr = QAction()
+        self.actionСompareSpectr.setText("Порівняти спектри")
+        self.actionСompareSpectr.triggered.connect(self.compareSpectr)
+        self.menuAnalize.addAction(self.actionСompareSpectr)
 
         self.setMenuBar(self.menubar)
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
         self.actionDownload = QAction()
-        self.actionDownload.setText("Завантажити файл")
-        self.actionDownload.triggered.connect(self.load_file)
+        self.actionDownload.setText("Завантажити спектрограму")
+        self.actionDownload.triggered.connect(self.load_spectrogram)
         self.menuFile.addAction(self.actionDownload)
+        self.actionSpectr = QAction()
+        self.actionSpectr.setText("Завантажити спектр")
+        self.actionSpectr.triggered.connect(self.load_spectr)
+        self.menuFile.addAction(self.actionSpectr)
+
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuAnalize.menuAction())
         
@@ -59,7 +62,7 @@ class Window(QMainWindow):
         self.label2.move(self.label.width() + 5, self.top_indent)
         self.label2.resize(0, 0)
 
-        self.setWindowTitle("Аналіз спектрограми двигуна")
+        self.setWindowTitle("Аналіз спектрограми роботи автомобіля")
         self.resize(800, 500)
 
         self.ConsoleWindow = Console.Console()
@@ -79,8 +82,7 @@ class Window(QMainWindow):
             fig, ax = plt.subplots(1)
             librosa.display.specshow(S_db, sr=sr, x_axis='time', y_axis='log', cmap='magma')
             plt.colorbar(format='%+2.0f дБ')
-            plt.title('Спектрограма')
-            plt.xlabel('Час')
+            plt.title(os.path.basename(file_path))
             plt.ylabel('Частота')
             
             fig.savefig("spectrum.png")
@@ -91,8 +93,7 @@ class Window(QMainWindow):
         else:
             return None, None
 
-
-    def spectr(self):
+    def download_spectr(self, label):
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Усі файли (*);;Текстові файли (*.txt)", options=options)
         if file_path:
@@ -110,15 +111,33 @@ class Window(QMainWindow):
             # Візуалізація спектра
             fig, ax = plt.subplots(1)
             plt.plot(positive_freqs, positive_magnitude, color='blue')
-            plt.title("Залежність інтенсивності сигналу від частоти")
+            #plt.xscale('log')
+            plt.yscale('log')
+            plt.title(os.path.basename(file_path))
             plt.xlabel("Частота (Гц)")
             plt.ylabel("Інтенсивність (Амплітуда)")
             fig.savefig("spectrum.png")
             pixmap = QtGui.QPixmap("spectrum.png")
-            self.label.setPixmap(pixmap)
-            self.label.setScaledContents(True) #маштабування зображення до розміру label
+            label.setPixmap(pixmap)
+            label.setScaledContents(True) #маштабування зображення до розміру label
+            return y, sr
+        else:
+            return None, None
 
-    def load_file(self):
+    def load_spectr(self):
+        self.download_spectr(self.label)
+
+    def compareSpectr(self):
+        if(self.label.pixmap() is not None):            # Якщо є перше зображення
+            self.download_spectr(self.label2)
+            if(self.label2.pixmap() is not None):       # Якщо є друге зображення
+                self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
+                self.label2.move(self.label.width(), self.top_indent)
+                self.label2.resize(self.label.width(), self.label.height())
+        else:
+            self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектр!")
+
+    def load_spectrogram(self):
         self.y, self.sr = self.download_file(self.label)
     
     def compare_spectrogram(self):
@@ -137,7 +156,7 @@ class Window(QMainWindow):
                 else:
                     self.ConsoleWindow.GetAnswer(f"Problem found")
         else:
-            self.ConsoleWindow.GetAnswer("Помилка! Завантажте файл!")
+            self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектрограму!")
             
 
     def resizeEvent(self, event):
@@ -160,8 +179,10 @@ class Window(QMainWindow):
             png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
             self.label.resize(png_width, png_height)  # width, height
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     Engine_Analizer_App = Window()
     Engine_Analizer_App.show()
     sys.exit(app.exec_())
+    
