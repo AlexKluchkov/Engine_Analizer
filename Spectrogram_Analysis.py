@@ -15,15 +15,17 @@ class Spectrogram_Analysis():
         normalized_spectrogram = normalized_spectrogram * (max_val - min_val) + min_val
         return normalized_spectrogram
 
-
-    def cosinus_compare_spectrgrum(self, y1, y2, sr1, sr2):
-
+    def cut_sound(y1, y2):
         if len(y1) > len(y2):
             y1 = y1[:len(y2)]
         elif len(y1) < len(y2):
             y2 = y2[:len(y1)]
+        return y1, y2
 
-        # Претворення в спектрограми
+    def cosinus_compare_spectrgrum(self, y1, y2, sr1, sr2):
+        
+        y1, y2 = Spectrogram_Analysis.cut_sound(y1, y2)
+        # Перетворення в спектрограми
         S1 = librosa.stft(y1)
         S2 = librosa.stft(y2)
         # Амплітудний спектр
