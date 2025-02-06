@@ -5,10 +5,10 @@ class Console(QWidget):
         super().__init__()
         self.resize(800, 200)
         self.label = QLabel(self)
-        self.label.resize(self.width(), self.height())
+        self.label.setGeometry(10, 0, self.width() - 10, self.height())
         self.setWindowTitle("Console")
 
     def GetAnswer(self, Answer):
         text = self.label.text()
         self.label.setText(text + "\n" + Answer)
-        
+
