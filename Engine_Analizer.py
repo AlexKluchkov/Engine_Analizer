@@ -1,5 +1,5 @@
-from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLineEdit, QFileDialog, QMenuBar, QMenu, QStatusBar, QAction, QLabel
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenuBar, QMenu, QStatusBar, QAction, QLabel
 
 import os
 import sys
@@ -31,9 +31,13 @@ class Window(QMainWindow):
         self.menuAnalize.setTitle("Проаналізувати")
 
         self.actionAnalize = QAction()
-        self.actionAnalize.setText("Порівняти спектрограми")
-        self.actionAnalize.triggered.connect(self.compare_spectrogram)
+        self.actionAnalize.setText("Аналіз запису")
+        self.actionAnalize.triggered.connect(self.analize_spectrogram)
         self.menuAnalize.addAction(self.actionAnalize)
+        self.actionСompareSpectrogrum = QAction()
+        self.actionСompareSpectrogrum.setText("Порівняти спектрограми")
+        self.actionСompareSpectrogrum.triggered.connect(self.compare_spectrogram)
+        self.menuAnalize.addAction(self.actionСompareSpectrogrum)
         self.actionСompareSpectr = QAction()
         self.actionСompareSpectr.setText("Порівняти спектри")
         self.actionСompareSpectr.triggered.connect(self.compareSpectr)
@@ -88,7 +92,7 @@ class Window(QMainWindow):
             fig.savefig("spectrum.png")
             pixmap = QtGui.QPixmap("spectrum.png")
             label.setPixmap(pixmap)
-            label.setScaledContents(True) #маштабування зображення до розміру label
+            label.setScaledContents(True)   #маштабування зображення до розміру label
             return y, sr
         else:
             return None, None
@@ -125,7 +129,7 @@ class Window(QMainWindow):
             return None, None
 
     def load_spectr(self):
-        self.download_spectr(self.label)
+        self.y, self.sr = self.download_spectr(self.label)
 
     def compareSpectr(self):
         if(self.label.pixmap() is not None):            # Якщо є перше зображення
@@ -150,15 +154,21 @@ class Window(QMainWindow):
 
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
                 cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
-                self.ConsoleWindow.GetAnswer(f"Cosine Similarity: {cos_sim}")
-                if(cos_sim > 0.9):
-                    self.ConsoleWindow.GetAnswer(f"No problems found")
-                else:
-                    self.ConsoleWindow.GetAnswer(f"Problem found")
+                self.ConsoleWindow.GetAnswer(f"Спектрограми схожі на {cos_sim * 100} %")
         else:
             self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектрограму!")
             
-
+    def analize_spectrogram(self):
+        if(self.label.pixmap() is not None):            # Якщо є перше зображення
+            Breakdowns = []
+            SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
+            Breakdowns = SpectrAnalysis.Breakdown_Analysis(self.y, self.sr)
+            if len(Breakdowns) != 0:
+                self.ConsoleWindow.GetAnswer("Знайдено проблема! " + ", ".join(Breakdowns) + "!")
+            else:
+                self.ConsoleWindow.GetAnswer(f"Проблеми відсутні!")
+        else:
+            self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектрограму!")
     def resizeEvent(self, event):
         self.resize_label()
         super().resizeEvent(event)
@@ -185,4 +195,3 @@ if __name__ == "__main__":
     Engine_Analizer_App = Window()
     Engine_Analizer_App.show()
     sys.exit(app.exec_())
-    
