@@ -3,6 +3,7 @@ from scipy.spatial.distance import cosine
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 import Console
 
@@ -42,3 +43,15 @@ class Spectrogram_Analysis():
         cos_sim = 1 - cosine(vec1, vec2)
 
         return cos_sim
+    
+    def Breakdown_Analysis(self, y1, sr1):
+        folder_path = "Sound_Recording\\"
+        Breakdown = []
+        ConsoleWindow = Console.Console()
+        for file_name in os.listdir(folder_path):
+            if os.path.isfile(os.path.join(folder_path, file_name)):
+                y2, sr2 = librosa.load(folder_path + file_name, sr=None)
+                cos_sim = Spectrogram_Analysis.cosinus_compare_spectrgrum(self, y1, y2, sr1, sr2)
+                if(cos_sim > 0.9):
+                    Breakdown.append(os.path.splitext(os.path.basename(file_name))[0])
+        return Breakdown
