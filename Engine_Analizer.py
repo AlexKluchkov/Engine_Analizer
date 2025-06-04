@@ -1,5 +1,5 @@
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenuBar, QMenu, QStatusBar, QAction, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenuBar, QMenu, QAction, QLabel
 
 import os
 import sys
@@ -12,7 +12,7 @@ import numpy as np
 import Spectrogram_Analysis
 import Console
 
-class Window(QMainWindow):
+class Engine_Analizer(QMainWindow):
     top_indent = 20                     #Відступ зверху зображення спектограм
     indent_between_spectrogram = 10     #Відступ між двума зображеннями спектограм при порівнянні
 
@@ -44,14 +44,16 @@ class Window(QMainWindow):
         self.menuAnalize.addAction(self.actionСompareSpectr)
 
         self.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar()
-        self.setStatusBar(self.statusbar)
+
+        #self.statusbar = QStatusBar()
+        #self.setStatusBar(self.statusbar)
+
         self.actionDownload = QAction()
-        self.actionDownload.setText("Завантажити спектрограму")
+        self.actionDownload.setText("Завантажити файл як спектрограму")
         self.actionDownload.triggered.connect(self.load_spectrogram)
         self.menuFile.addAction(self.actionDownload)
         self.actionSpectr = QAction()
-        self.actionSpectr.setText("Завантажити спектр")
+        self.actionSpectr.setText("Завантажити файл як спектр")
         self.actionSpectr.triggered.connect(self.load_spectr)
         self.menuFile.addAction(self.actionSpectr)
 
@@ -73,10 +75,10 @@ class Window(QMainWindow):
         self.ConsoleWindow.show()
 
 
-    def download_file(self, label):
+    def download_spectrogrum(self, label):
         # Діалог вибору файла
         options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Усі файли (*);;Текстові файли (*.txt)", options=options)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Звукові файли (*.mp3)", options=options)
         if file_path:
             #обчислення спектрограми
             y, sr = librosa.load(file_path, sr=None)
@@ -99,7 +101,7 @@ class Window(QMainWindow):
 
     def download_spectr(self, label):
         options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Усі файли (*);;Текстові файли (*.txt)", options=options)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Усі файли (*);;Звукові файли (*.mp3)", options=options)
         if file_path:
             #обчислення спектра
             y, sr = librosa.load(file_path, sr=None)
@@ -133,20 +135,23 @@ class Window(QMainWindow):
 
     def compareSpectr(self):
         if(self.label.pixmap() is not None):            # Якщо є перше зображення
-            self.download_spectr(self.label2)
+            y2, sr2 = self.download_spectr(self.label2)
             if(self.label2.pixmap() is not None):       # Якщо є друге зображення
                 self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
                 self.label2.move(self.label.width(), self.top_indent)
                 self.label2.resize(self.label.width(), self.label.height())
+                SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
+                cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
+                self.ConsoleWindow.GetAnswer(f"Спектри схожі на {cos_sim} %")
         else:
             self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектр!")
 
     def load_spectrogram(self):
-        self.y, self.sr = self.download_file(self.label)
+        self.y, self.sr = self.download_spectrogrum(self.label)
     
     def compare_spectrogram(self):
         if(self.label.pixmap() is not None):            # Якщо є перше зображення
-            y2, sr2= self.download_file(self.label2)             # завантажуємо друге
+            y2, sr2= self.download_spectrogrum(self.label2)             # завантажуємо друге
             if(self.label2.pixmap() is not None):       # Якщо є друге зображення
                 self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
                 self.label2.move(self.label.width(), self.top_indent)
@@ -169,6 +174,7 @@ class Window(QMainWindow):
                 self.ConsoleWindow.GetAnswer(f"Проблеми відсутні!")
         else:
             self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектрограму!")
+
     def resizeEvent(self, event):
         self.resize_label()
         super().resizeEvent(event)
@@ -192,6 +198,6 @@ class Window(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    Engine_Analizer_App = Window()
+    Engine_Analizer_App = Engine_Analizer()
     Engine_Analizer_App.show()
     sys.exit(app.exec_())
