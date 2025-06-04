@@ -13,8 +13,8 @@ import Spectrogram_Analysis
 import Console
 
 class Engine_Analizer(QMainWindow):
-    top_indent = 20                     #Відступ зверху зображення спектограм
-    indent_between_spectrogram = 10     #Відступ між двума зображеннями спектограм при порівнянні
+    top_indent = 20                     
+    indent_between_spectrogram = 10    
 
     def __init__(self):
         super().__init__()
@@ -26,20 +26,20 @@ class Engine_Analizer(QMainWindow):
         self.menubar = QMenuBar(self)
         self.menubar.setGeometry(0, 0, 800, self.top_indent)
         self.menuFile = QMenu(self.menubar)
-        self.menuFile.setTitle("Файл")
+        self.menuFile.setTitle("File")
         self.menuAnalize = QMenu(self.menubar)
-        self.menuAnalize.setTitle("Проаналізувати")
+        self.menuAnalize.setTitle("Analyze")
 
         self.actionAnalize = QAction()
-        self.actionAnalize.setText("Аналіз запису")
+        self.actionAnalize.setText("Recording analysis")
         self.actionAnalize.triggered.connect(self.analize_spectrogram)
         self.menuAnalize.addAction(self.actionAnalize)
         self.actionСompareSpectrogrum = QAction()
-        self.actionСompareSpectrogrum.setText("Порівняти спектрограми")
+        self.actionСompareSpectrogrum.setText("Compare spectrograms")
         self.actionСompareSpectrogrum.triggered.connect(self.compare_spectrogram)
         self.menuAnalize.addAction(self.actionСompareSpectrogrum)
         self.actionСompareSpectr = QAction()
-        self.actionСompareSpectr.setText("Порівняти спектри")
+        self.actionСompareSpectr.setText("Compare spectra")
         self.actionСompareSpectr.triggered.connect(self.compareSpectr)
         self.menuAnalize.addAction(self.actionСompareSpectr)
 
@@ -49,11 +49,11 @@ class Engine_Analizer(QMainWindow):
         #self.setStatusBar(self.statusbar)
 
         self.actionDownload = QAction()
-        self.actionDownload.setText("Завантажити файл як спектрограму")
+        self.actionDownload.setText("Download file as spectrogram")
         self.actionDownload.triggered.connect(self.load_spectrogram)
         self.menuFile.addAction(self.actionDownload)
         self.actionSpectr = QAction()
-        self.actionSpectr.setText("Завантажити файл як спектр")
+        self.actionSpectr.setText("Download file as spectrum")
         self.actionSpectr.triggered.connect(self.load_spectr)
         self.menuFile.addAction(self.actionSpectr)
 
@@ -68,7 +68,7 @@ class Engine_Analizer(QMainWindow):
         self.label2.move(self.label.width() + 5, self.top_indent)
         self.label2.resize(0, 0)
 
-        self.setWindowTitle("Аналіз спектрограми роботи автомобіля")
+        self.setWindowTitle("Analysis of the spectrogram of the car's operation")
         self.resize(800, 500)
 
         self.ConsoleWindow = Console.Console()
@@ -78,43 +78,42 @@ class Engine_Analizer(QMainWindow):
     def download_spectrogrum(self, label):
         # Діалог вибору файла
         options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Звукові файли (*.mp3)", options=options)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select file", "", "Sound files (*.mp3)", options=options)
         if file_path:
-            #обчислення спектрограми
+            #calculate spectrogram
             y, sr = librosa.load(file_path, sr=None)
             D = librosa.stft(y)
             S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-            # Візуализація спектрограми
+            # Spectrogram visualization
             fig, ax = plt.subplots(1)
             librosa.display.specshow(S_db, sr=sr, x_axis='time', y_axis='log', cmap='magma')
-            plt.colorbar(format='%+2.0f дБ')
+            plt.colorbar(format='%+2.0f dB')
             plt.title(os.path.basename(file_path))
-            plt.ylabel('Частота')
+            plt.ylabel('Frequency')
             
             fig.savefig("spectrum.png")
             pixmap = QtGui.QPixmap("spectrum.png")
             label.setPixmap(pixmap)
-            label.setScaledContents(True)   #маштабування зображення до розміру label
+            label.setScaledContents(True)   
             return y, sr
         else:
             return None, None
 
     def download_spectr(self, label):
         options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getOpenFileName(self, "Виберіть файл", "", "Усі файли (*);;Звукові файли (*.mp3)", options=options)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select file", "", "Sound files (*.mp3)", options=options)
         if file_path:
-            #обчислення спектра
+            #spectrum calculation
             y, sr = librosa.load(file_path, sr=None)
             n = len(y)
             fft = np.fft.fft(y)
             magnitude = np.abs(fft)  # Амплитуди
             frequency = np.fft.fftfreq(n, 1/sr)  # Частоти
     
-            # Лишаємо тільки позитивні частоти
             positive_freqs = frequency[:n//2]
             positive_magnitude = magnitude[:n//2]
         
-            # Візуалізація спектра
+            # Spectrum visualization
             fig, ax = plt.subplots(1)
             plt.plot(positive_freqs, positive_magnitude, color='blue')
             #plt.xscale('log')
@@ -134,46 +133,46 @@ class Engine_Analizer(QMainWindow):
         self.y, self.sr = self.download_spectr(self.label)
 
     def compareSpectr(self):
-        if(self.label.pixmap() is not None):            # Якщо є перше зображення
+        if(self.label.pixmap() is not None):            
             y2, sr2 = self.download_spectr(self.label2)
-            if(self.label2.pixmap() is not None):       # Якщо є друге зображення
-                self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
+            if(self.label2.pixmap() is not None):       
+                self.label.resize(int(self.width() / 2), int(self.height() / 2))    
                 self.label2.move(self.label.width(), self.top_indent)
                 self.label2.resize(self.label.width(), self.label.height())
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
                 cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
-                self.ConsoleWindow.GetAnswer(f"Спектри схожі на {cos_sim} %")
+                self.ConsoleWindow.GetAnswer(f"Spectra are {cos_sim} % similar")
         else:
-            self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектр!")
+            self.ConsoleWindow.GetAnswer("Error! Load spectrum!")
 
     def load_spectrogram(self):
         self.y, self.sr = self.download_spectrogrum(self.label)
     
     def compare_spectrogram(self):
-        if(self.label.pixmap() is not None):            # Якщо є перше зображення
-            y2, sr2= self.download_spectrogrum(self.label2)             # завантажуємо друге
-            if(self.label2.pixmap() is not None):       # Якщо є друге зображення
+        if(self.label.pixmap() is not None):            
+            y2, sr2= self.download_spectrogrum(self.label2)             
+            if(self.label2.pixmap() is not None):       
                 self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
                 self.label2.move(self.label.width(), self.top_indent)
                 self.label2.resize(self.label.width(), self.label.height())
 
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
                 cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
-                self.ConsoleWindow.GetAnswer(f"Спектрограми схожі на {cos_sim * 100} %")
+                self.ConsoleWindow.GetAnswer(f"Spectrograms are {cos_sim * 100} % similar")
         else:
-            self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектрограму!")
+            self.ConsoleWindow.GetAnswer("Error! Load spectrogram!")
             
     def analize_spectrogram(self):
-        if(self.label.pixmap() is not None):            # Якщо є перше зображення
+        if(self.label.pixmap() is not None):            
             Breakdowns = []
             SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
             Breakdowns = SpectrAnalysis.Breakdown_Analysis(self.y, self.sr)
             if len(Breakdowns) != 0:
-                self.ConsoleWindow.GetAnswer("Знайдено проблема! " + ", ".join(Breakdowns) + "!")
+                self.ConsoleWindow.GetAnswer("Problem found ! " + ", ".join(Breakdowns) + "!")
             else:
-                self.ConsoleWindow.GetAnswer(f"Проблеми відсутні!")
+                self.ConsoleWindow.GetAnswer(f"No problems!")
         else:
-            self.ConsoleWindow.GetAnswer("Помилка! Завантажте спектрограму!")
+            self.ConsoleWindow.GetAnswer("Error! Load spectrogram!")
 
     def resizeEvent(self, event):
         self.resize_label()
@@ -183,16 +182,16 @@ class Engine_Analizer(QMainWindow):
         if(self.label2.width() != 0):
             delta_width = self.width() - (self.label.width() + self.label2.width() + 5)
             delta_height = self.height() - (self.label.height() + self.top_indent)
-            png_width = self.label.width() + int(min(delta_width, delta_height)/2)  # Зміна ширини (2 малюнки)
-            png_height = self.label.height() + int(min(delta_width, delta_height)/2)  # Зміна висоти
+            png_width = self.label.width() + int(min(delta_width, delta_height)/2)  
+            png_height = self.label.height() + int(min(delta_width, delta_height)/2)  
             self.label.resize(png_width, png_height)
             self.label2.move(self.label.width() + self.indent_between_spectrogram, self.top_indent)
             self.label2.resize(png_width, png_height)  # width, height
         else:
             delta_width = self.width() - self.label.width()
             delta_height = self.height() - (self.label.height() + self.top_indent)
-            png_width = self.label.width() + min(delta_width, delta_height)  # Зміна ширини
-            png_height = self.label.height() + min(delta_width, delta_height)  # Зміна висоти
+            png_width = self.label.width() + min(delta_width, delta_height)  
+            png_height = self.label.height() + min(delta_width, delta_height)  
             self.label.resize(png_width, png_height)  # width, height
 
 
