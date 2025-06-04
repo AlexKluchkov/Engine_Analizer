@@ -40,11 +40,6 @@ class Spectrogram_Analysis():
 
         cos_sim = 1 - cosine(vec1, vec2)
         
-        #S1 = librosa.feature.melspectrogram(y=y1, sr=sr1)
-        #S2 = librosa.feature.melspectrogram(y=y2, sr=sr2)
-
-        #cos_sim = np.dot(S1.mean(axis=1), S2.mean(axis=1)) / (np.linalg.norm(S1.mean(axis=1)) * np.linalg.norm(S2.mean(axis=1)))
-        
         return cos_sim
     
     def Breakdown_Analysis(self, y1, sr1):
