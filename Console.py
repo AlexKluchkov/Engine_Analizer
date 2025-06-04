@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QLabel
 
+
 class Console(QWidget):
     def __init__(self):
         super().__init__()
@@ -11,4 +12,3 @@ class Console(QWidget):
     def GetAnswer(self, Answer):
         text = self.label.text()
         self.label.setText(text + "\n" + Answer)
-

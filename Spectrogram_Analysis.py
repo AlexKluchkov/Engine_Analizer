@@ -1,7 +1,6 @@
 from scipy.spatial.distance import cosine
 
 import librosa.display
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 
@@ -26,22 +25,21 @@ class Spectrogram_Analysis():
     def cosinus_compare_spectrgrum(self, y1, y2, sr1, sr2):
         
         y1, y2 = Spectrogram_Analysis.cut_sound(y1, y2)
-        # Перетворення в спектрограми
+
         S1 = librosa.stft(y1)
         S2 = librosa.stft(y2)
-        # Амплітудний спектр
+
         S1_db = librosa.amplitude_to_db(np.abs(S1), ref=np.max)
         S2_db = librosa.amplitude_to_db(np.abs(S2), ref=np.max)
 
         S1_db = Spectrogram_Analysis.normalize_spectrogram(S1_db)
         S2_db = Spectrogram_Analysis.normalize_spectrogram(S2_db)
 
-        # Перетвореня спектрограм у вектори
         vec1 = S1_db.flatten()
         vec2 = S2_db.flatten()
 
         cos_sim = 1 - cosine(vec1, vec2)
-
+        
         return cos_sim
     
     def Breakdown_Analysis(self, y1, sr1):
