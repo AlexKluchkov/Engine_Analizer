@@ -45,9 +45,6 @@ class Engine_Analizer(QMainWindow):
 
         self.setMenuBar(self.menubar)
 
-        #self.statusbar = QStatusBar()
-        #self.setStatusBar(self.statusbar)
-
         self.actionDownload = QAction()
         self.actionDownload.setText("Download file as spectrogram")
         self.actionDownload.triggered.connect(self.load_spectrogram)
@@ -62,11 +59,13 @@ class Engine_Analizer(QMainWindow):
         
         self.label = QLabel(self)
         self.label.move(0, self.top_indent)
-        self.label.resize(640, 480)
+        self.label.resize(300, 220)
+        self.label.setStyleSheet('border-style: solid; border-width: 1px; border-color: black;')
 
         self.label2 = QLabel(self)
-        self.label2.move(self.label.width() + 5, self.top_indent)
-        self.label2.resize(0, 0)
+        self.label2.move(self.label.width() + self.indent_between_spectrogram, self.top_indent)
+        self.label2.resize(300, 220)
+        self.label2.setStyleSheet('border-style: solid; border-width: 1px; border-color: black;')
 
         self.setWindowTitle("Analysis of the spectrogram of the car's operation")
         self.resize(800, 500)
@@ -76,7 +75,7 @@ class Engine_Analizer(QMainWindow):
 
 
     def download_spectrogrum(self, label):
-        # Діалог вибору файла
+        # File selection dialog
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Select file", "", "Sound files (*.mp3)", options=options)
         if file_path:
@@ -107,8 +106,8 @@ class Engine_Analizer(QMainWindow):
             y, sr = librosa.load(file_path, sr=None)
             n = len(y)
             fft = np.fft.fft(y)
-            magnitude = np.abs(fft)  # Амплитуди
-            frequency = np.fft.fftfreq(n, 1/sr)  # Частоти
+            magnitude = np.abs(fft)  # Amplitudes
+            frequency = np.fft.fftfreq(n, 1/sr)  # Frequencies
     
             positive_freqs = frequency[:n//2]
             positive_magnitude = magnitude[:n//2]
@@ -119,8 +118,8 @@ class Engine_Analizer(QMainWindow):
             #plt.xscale('log')
             plt.yscale('log')
             plt.title(os.path.basename(file_path))
-            plt.xlabel("Частота (Гц)")
-            plt.ylabel("Інтенсивність (Амплітуда)")
+            plt.xlabel("Frequency (Hz)")
+            plt.ylabel("Intensity (Amplitude)")
             fig.savefig("spectrum.png")
             pixmap = QtGui.QPixmap("spectrum.png")
             label.setPixmap(pixmap)
@@ -136,9 +135,10 @@ class Engine_Analizer(QMainWindow):
         if(self.label.pixmap() is not None):            
             y2, sr2 = self.download_spectr(self.label2)
             if(self.label2.pixmap() is not None):       
-                self.label.resize(int(self.width() / 2), int(self.height() / 2))    
-                self.label2.move(self.label.width(), self.top_indent)
-                self.label2.resize(self.label.width(), self.label.height())
+                #self.label.resize(int(self.width() / 2), int(self.height() / 2))    
+                #self.label2.move(self.label.width(), self.top_indent)
+                #self.label2.resize(self.label.width(), self.label.height())
+
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
                 cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
                 self.ConsoleWindow.GetAnswer(f"Spectra are {cos_sim} % similar")
@@ -152,9 +152,9 @@ class Engine_Analizer(QMainWindow):
         if(self.label.pixmap() is not None):            
             y2, sr2= self.download_spectrogrum(self.label2)             
             if(self.label2.pixmap() is not None):       
-                self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
-                self.label2.move(self.label.width(), self.top_indent)
-                self.label2.resize(self.label.width(), self.label.height())
+                #self.label.resize(int(self.width() / 2), int(self.height() / 2))    #змінюємо розмір
+                #self.label2.move(self.label.width(), self.top_indent)
+                #self.label2.resize(self.label.width(), self.label.height())
 
                 SpectrAnalysis = Spectrogram_Analysis.Spectrogram_Analysis()
                 cos_sim = SpectrAnalysis.cosinus_compare_spectrgrum(self.y, y2, self.sr, sr2)
